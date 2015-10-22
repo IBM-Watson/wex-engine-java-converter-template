@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!-- Ant build file (http://ant.apache.org/) for Ant 1.6.5 or above.        -->
+<!-- ====================================================================== -->
+
+<project name="converter-bootstrap" default="package" basedir=".">
+
+  <!-- ====================================================================== -->
+  <!-- Help target                                                            -->
+  <!-- ====================================================================== -->
+
+  <target name="help">
+    <echo message="Please run: $ant -projecthelp"/>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Build environment properties                                           -->
+  <!-- ====================================================================== -->
+  <property name="template.build.version" value="1.0-0-SNAPSHOT" />
+  <property name="template.build.finalName" value="${ant.project.name}-${template.build.version}"/>
+  <property name="template.build.dir" value="target"/>
+  <property name="template.build.outputDir" value="${template.build.dir}/classes"/>
+  <property name="template.build.srcDir.0" value="src/main/java"/>
+  <property name="template.reporting.outputDirectory" value="${template.build.dir}/site"/>
+
+  <property name="template.settings.offline" value="false"/>
+  <property name="template.settings.interactiveMode" value="true"/>
+
+  <!-- ====================================================================== -->
+  <!-- Defining classpaths                                                    -->
+  <!-- ====================================================================== -->
+
+  <path id="build.classpath">
+    <fileset dir="lib">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+
+  <!-- ====================================================================== -->
+  <!-- Cleaning up target                                                     -->
+  <!-- ====================================================================== -->
+
+  <target name="clean" description="Clean the output directory">
+    <delete dir="${template.build.dir}"/>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Compilation target                                                     -->
+  <!-- ====================================================================== -->
+
+  <target name="compile" description="Compile the code">
+    <mkdir dir="${template.build.outputDir}"/>
+    <javac destdir="${template.build.outputDir}"
+           nowarn="true"
+           debug="true"
+           optimize="false"
+           deprecation="true"
+           target="1.6"
+           verbose="false"
+           fork="false"
+           source="1.6">
+      <src>
+        <pathelement location="${template.build.srcDir.0}"/>
+      </src>
+      <classpath refid="build.classpath"/>
+    </javac>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Manifest target                                                        -->
+  <!-- ====================================================================== -->
+
+  <target name="manifest" depends="compile"
+          description="Generate the plugin manifest">
+      <manifest file="target/MANIFEST.MF">
+        <attribute name="Specification-Title" value="${ant.project.name}"/>
+        <attribute name="Specification-Version" value="${template.build.version}"/>
+        <attribute name="Specification-Vendor" value="IBM Corporation"/>
+        <attribute name="Implementation-Title" value="${ant.project.name}"/>
+        <attribute name="Implementation-Version" value="${template.build.version}"/>
+        <attribute name="Implementation-Vendor" value="IBM Corporation"/>
+        <attribute name="Implementation-Vendor-Id"
+                   value="com.ibm.dataexplorer.converter"/>
+        <attribute name="Built-By" value="${user.name}"/>
+      </manifest>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Jar target                                                             -->
+  <!-- ====================================================================== -->
+
+  <target name="jar" depends="compile,manifest" description="Build a deployable jar">
+    <jar destfile="target/${ant.project.name}-${template.build.version}.jar"
+         basedir="target/classes">
+      <manifest>
+        <attribute name="Specification-Title" value="${ant.project.name}"/>
+        <attribute name="Specification-Version" value="${template.build.version}"/>
+        <attribute name="Specification-Vendor" value="IBM Corporation"/>
+        <attribute name="Implementation-Title" value="${ant.project.name}"/>
+        <attribute name="Implementation-Version" value="${template.build.version}"/>
+        <attribute name="Implementation-Vendor" value="IBM Corporation"/>
+        <attribute name="Implementation-Vendor-Id"
+                   value="com.ibm.dataexplorer.converter"/>
+        <attribute name="Built-By" value="${user.name}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Plugin target                                                          -->
+  <!-- ====================================================================== -->
+
+  <target name="plugin" depends="compile,manifest,jar"
+          description="Build the plugin archive">
+    <mkdir dir="target/plugin-zip/lib" />
+    <mkdir dir="target/plugin-zip/META-INF" />
+    <copy todir="target/plugin-zip/lib"
+          file= "target/${ant.project.name}-${template.build.version}.jar"/>
+     <!--<copy todir="target/plugin-zip/lib"
+          file= "lib/build-meta-tools-1.0.0.jar"/>-->
+    <copy todir="target/plugin-zip/META-INF"
+          file="target/MANIFEST.MF"/>
+    <copy tofile="target/plugin-zip/plugin.xml"
+      file="src/plugin/plugin.ant" />
+    <replace file="target/plugin-zip/plugin.xml" token="!PROJECT_JAR" value="${ant.project.name}-${template.build.version}.jar"/>
+    <replace file="target/plugin-zip/plugin.xml" token="!PROJECT_VERSION" value="${template.build.version}"/>
+
+    <zip destfile="target/${ant.project.name}-${template.build.version}.zip"
+         basedir="target/plugin-zip">
+    </zip>
+    <delete includeemptydirs="true">
+      <fileset dir="target/plugin-zip"/>
+    </delete>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Package target                                                         -->
+  <!-- ====================================================================== -->
+
+  <target name="package" depends="compile,manifest,jar,plugin"
+          description="Package the application">
+    <mkdir dir="target/distrib-zip/lib/java/plugins" />
+    <mkdir dir="target/distrib-zip/data/repository-supplements"/>
+
+    <copy todir="target/distrib-zip/data/repository-supplements">
+      <fileset dir="src/main/nodes" includes="**/*.xml" />
+    </copy>
+
+    <copy todir="target/distrib-zip/lib/java/plugins/"
+          file="target/${ant.project.name}-${template.build.version}.zip"/>
+
+    <zip destfile="target/${ant.project.name}-${template.build.version}-distrib.zip"
+         basedir="target/distrib-zip"/>
+  </target>
+
+</project>

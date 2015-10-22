@@ -1,0 +1,14 @@
+<function name="vse-converter-bootstrap-file-converter" type="converter-java" products="all" internal="${project.version}">
+  <!-- TODO: Specify your type-in and type-out attributes of the function element -->
+  <prototype>
+    <label>Bootstrap Java File Converter</label>
+    <description>
+      This converter invokes the Java converter interface and takes a file as an Input. But does no actual converting.
+    </description>
+  </prototype>
+  <!-- TODO If using the FileConverter, you must add input="file" attribute to the <parser> node -->
+  <parser type="java" input="file">
+    <option name="install-dir"><value-of select="viv:value-of('install-dir', 'option')"/></option>
+    <option name="plugin-name">bootstrap.plugin@bootstrap-file-converter</option>
+  </parser>
+</function>
