@@ -10,7 +10,12 @@
     <import plugin-id="main.plugin" />
   </requires>
   <runtime>
-      <library id="converter-bootstrap" path="lib/!PROJECT_JARr3" type="code"/>
+    <library id="converter-bootstrap" path="lib/!PROJECT_JAR" type="code"/>
+    <!-- If your converter requires additional dependencies that need to be packaged
+         you will need to include those here as well -->
+    <!-- Example: If you wanted to include commons imaging:
+         <library id="commons-imaging:commons-imaging:jar:1.0-SNAPSHOT" path="lib/commons-imaging-1.0-SNAPSHOT.jar" type="code"/>
+     -->
   </runtime>
   <extension plugin-id="main.plugin" point-id="com.ibm.dataexplorer.converter.ByteArrayConverter"
              id="bootstrap-converter">
